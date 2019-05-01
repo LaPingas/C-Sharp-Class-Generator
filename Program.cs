@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using static System.Console;
@@ -13,12 +13,12 @@ namespace Class_Generator
             string className = Input("Enter class name: ");
             string userNamespace = Input("Enter namespace: ");
             File.AppendAllText($"{className}.cs",
-                "using System" + Environment.NewLine +
+                "using System;" + Environment.NewLine +
                 "" + Environment.NewLine +
                 $"namespace {userNamespace}" + Environment.NewLine +
                 "{" + Environment.NewLine +
                 $"    public class {className}" + Environment.NewLine +
-                "    {" + Environment.NewLine);
+                "    {");
             string protectionLevel = "";
             List<string> attributeNameList = new List<string>();
             List<string> attributeTypeList = new List<string>();
@@ -55,65 +55,68 @@ namespace Class_Generator
                 attributeTypeList.Add(attributeType);
                 string attributeName = Input("Enter attribute name: ");
                 attributeNameList.Add(attributeName);
-                File.AppendAllText($"{className}.cs",
-                    $"		{protectionLevel} {attributeType} {attributeName};" + Environment.NewLine);
+                File.AppendAllText($"{className}.cs", Environment.NewLine +
+                    $"		{protectionLevel} {attributeType} {attributeName};");
                 input = Input("Continue? (y/n) ", "char");
                 while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
             }
-            input = Input("Add default constructor? (y/n) ", "char");
-            while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
-            if (input == 'y')
+            if (attributeNameList.Count > 0)
             {
-                File.AppendAllText($"{className}.cs",
-                    Environment.NewLine + $"        public {className}()" + " { }");
-            }
-            input = Input("Add values constructor? (y/n) ", "char");
-            while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
-            if (input == 'y')
-            {
-                string signatureString = $"        public {className}(";
+                input = Input("Add default constructor? (y/n) ", "char");
+                while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
+                if (input == 'y')
+                {
+                    File.AppendAllText($"{className}.cs",
+                        Environment.NewLine + Environment.NewLine + $"        public {className}()" + " { }");
+                }
+                input = Input("Add values constructor? (y/n) ", "char");
+                while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
+                if (input == 'y')
+                {
+                    string signatureString = $"        public {className}(";
+                    for (int i = 0; i < attributeNameList.Count; i++)
+                    {
+                        if (i != attributeNameList.Count - 1)
+                            signatureString += $"{attributeTypeList[i]} {attributeNameList[i]}, ";
+                        else
+                            signatureString += $"{attributeTypeList[i]} {attributeNameList[i]})";
+                    }
+                    File.AppendAllText($"{className}.cs",
+                        Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
+                    foreach (string attributeName in attributeNameList)
+                    {
+                        File.AppendAllText($"{className}.cs",
+                            Environment.NewLine + $"            this.{attributeName} = {attributeName};");
+                    }
+                    File.AppendAllText($"{className}.cs",
+                        Environment.NewLine + "        }");
+                }
+                input = Input("Add copy constructor? (y/n) ", "char");
+                while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
+                if (input == 'y')
+                {
+                    string signatureString = $"        public {className}({className} toCopy)";
+                    File.AppendAllText($"{className}.cs",
+                        Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
+                    foreach (string attributeName in attributeNameList)
+                    {
+                        File.AppendAllText($"{className}.cs",
+                            Environment.NewLine + $"            this.{attributeName} = toCopy.{attributeName};");
+                    }
+                    File.AppendAllText($"{className}.cs",
+                        Environment.NewLine + "        }");
+                }
                 for (int i = 0; i < attributeNameList.Count; i++)
                 {
-                    if (i != attributeNameList.Count - 1)
-                        signatureString += $"{attributeTypeList[i]} {attributeNameList[i]}, ";
-                    else
-                        signatureString += $"{attributeTypeList[i]} {attributeNameList[i]})";
-                }
-                File.AppendAllText($"{className}.cs",
-                    Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
-                foreach (string attributeName in attributeNameList)
-                {
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + $"            this.{attributeName} = {attributeName};");
+                            Environment.NewLine + Environment.NewLine + $"        public {attributeTypeList[i]} {attributeNameList[i].Substring(0, 1).ToUpper() + attributeNameList[i].Substring(1)}"
+                            + Environment.NewLine + "        {"
+                            + Environment.NewLine + "            get { return " + attributeNameList[i] + "; }"
+                            + Environment.NewLine + "            set { " + attributeNameList[i] + " = value; }"
+                            + Environment.NewLine + "        }");
                 }
-                File.AppendAllText($"{className}.cs",
-                    Environment.NewLine + "        }");
+                File.AppendAllText($"{className}.cs", Environment.NewLine + "    }" + Environment.NewLine + "}");
             }
-            input = Input("Add copy constructor? (y/n) ", "char");
-            while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
-            if (input == 'y')
-            {
-                string signatureString = $"        public {className}({className} toCopy)";
-                File.AppendAllText($"{className}.cs",
-                    Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
-                foreach (string attributeName in attributeNameList)
-                {
-                    File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + $"            this.{attributeName} = toCopy.{attributeName};");
-                }
-                File.AppendAllText($"{className}.cs",
-                    Environment.NewLine + "        }");
-            }
-            for (int i = 0; i < attributeNameList.Count; i++)
-            {
-                File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + Environment.NewLine + $"        public {attributeTypeList[i]} {attributeNameList[i].Substring(0, 1).ToUpper() + attributeNameList[i].Substring(1)}"
-                        + Environment.NewLine + "        {"
-                        + Environment.NewLine + "            get { return " + attributeNameList[i] + "; }"
-                        + Environment.NewLine + "            set { " + attributeNameList[i] + " = value; }"
-                        + Environment.NewLine + "        }");
-            }
-            File.AppendAllText($"{className}.cs", Environment.NewLine + "    }" + Environment.NewLine + "}");
         }
     }
 }
