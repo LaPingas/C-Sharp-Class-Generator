@@ -6,7 +6,7 @@ using static Class_Generator.Toolkit;
 
 namespace Class_Generator
 {
-    class Program
+    public class Program
     {
         public static void Main()
         {
@@ -175,6 +175,77 @@ namespace Class_Generator
                 }
                 File.AppendAllLines($@"{newDirectory}\{userNamespace}.csproj", newFile);
             }
+        }
+    }
+
+    public class Toolkit
+    {
+        public static dynamic ReturnParsedValue(dynamic x, string type)
+        {
+            switch (type)
+            {
+                case "byte":
+                    x = byte.TryParse($"{x}", out byte resultByte) ? (byte?)byte.Parse($"{x}") : null;
+                    break;
+                case "sbyte":
+                    x = sbyte.TryParse($"{x}", out sbyte resultSByte) ? (sbyte?)sbyte.Parse($"{x}") : null;
+                    break;
+                case "ushort":
+                    x = ushort.TryParse($"{x}", out ushort resultUShort) ? (ushort?)ushort.Parse($"{x}") : null;
+                    break;
+                case "short":
+                    x = short.TryParse($"{x}", out short resultShort) ? (short?)short.Parse($"{x}") : null;
+                    break;
+                case "uint":
+                    x = uint.TryParse($"{x}", out uint resultUInt) ? (uint?)uint.Parse($"{x}") : null;
+                    break;
+                case "int":
+                    x = int.TryParse($"{x}", out int resultInt) ? (int?)int.Parse($"{x}") : null;
+                    break;
+                case "ulong":
+                    x = ulong.TryParse($"{x}", out ulong resultULong) ? (ulong?)ulong.Parse($"{x}") : null;
+                    break;
+                case "long":
+                    x = long.TryParse($"{x}", out long resultLong) ? (long?)long.Parse($"{x}") : null;
+                    break;
+                case "float":
+                    x = float.TryParse($"{x}", out float resultFloat) ? (float?)float.Parse($"{x}") : null;
+                    break;
+                case "double":
+                    x = double.TryParse($"{x}", out double resultDouble) ? (double?)double.Parse($"{x}") : null;
+                    break;
+                case "decimal":
+                    x = decimal.TryParse($"{x}", out decimal resultDecimal) ? (decimal?)decimal.Parse($"{x}") : null;
+                    break;
+                case "bool":
+                    x = bool.TryParse($"{x}", out bool resultBool) ? (bool?)bool.Parse($"{x}") : null;
+                    break;
+                case "char":
+                    x = char.TryParse($"{x}", out char resultChar) ? (char?)char.Parse($"{x}") : null;
+                    break;
+                case null:
+                    x = $"{x}";
+                    break;
+                default:
+                    WriteLine("ERROR - VARIABLE TYPE DOESN'T EXIST. EXITING APPLICATION.");
+                    Environment.Exit(0);
+                    break;
+            }
+            return x;
+        }
+
+        public static dynamic Input(string message, string type = null)
+        {
+            Write(message);
+            dynamic x = ReadLine();
+            x = ReturnParsedValue(x, type);
+            while (x == null)
+            {
+                Write("Invalid value. Please try again: ");
+                x = ReadLine();
+                x = ReturnParsedValue(x, type);
+            }
+            return x;
         }
     }
 }
