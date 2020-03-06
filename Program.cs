@@ -18,30 +18,34 @@ namespace Class_Generator
             // Asking for the class properties
             string className = Input("Enter class name: ");
             string userNamespace = Input("Enter namespace: ");
+            string inheritance = Input("Enter inheritance (default: no inheritance): ");
+            if (inheritance != string.Empty)
+                inheritance = $" : {inheritance}";
             string newUserNamespace = userNamespace;
 
             // Remove spaces from the namespace for the file itself
             while (newUserNamespace.Contains(" "))
                 newUserNamespace = newUserNamespace.Replace(" ", "_");
-
             // Create the file structure
             File.AppendAllText($"{className}.cs",
-                "using System;" + Environment.NewLine +
-                "" + Environment.NewLine +
-                $"namespace {newUserNamespace}" + Environment.NewLine +
-                "{" + Environment.NewLine +
-                $"    public class {className}" + Environment.NewLine +
+                "using System;" + NewLine +
+                "" + NewLine +
+                $"namespace {newUserNamespace}" + NewLine +
+                "{" + NewLine +
+                $"    public class {className}{inheritance}" + NewLine +
                 "    {");
 
             string protectionLevel = "";
             List<string> attributeNameList = new List<string>();
+            List<string> inheritanceAttributeNameList = new List<string>();
             List<string> attributeTypeList = new List<string>();
+            List<string> inheritanceAttributeTypeList = new List<string>();
 
             char input = Input("Add attributes? (y/n) ", "char");
             while (input != 'y' && input != 'n') input = Input("Invalid input. Add attributes? (y/n) ", "char");
             while (input == 'y') // Adding attrubutes
             {
-                protectionLevelIndicator:
+            protectionLevelIndicator:
                 byte protectionLevelIndicator = Input("Enter protection level " +
                     "(1 for public, 2 for private, " +
                     "3 for internal, 4 for protected internal, 5 for private protected): ", "byte");
@@ -73,14 +77,32 @@ namespace Class_Generator
                 string attributeName = Input("Enter attribute name: ");
                 attributeNameList.Add(attributeName);
 
-                File.AppendAllText($"{className}.cs", Environment.NewLine +
+                File.AppendAllText($"{className}.cs", NewLine +
                     $"		{protectionLevel} {attributeType} {attributeName};");
 
                 input = Input("Continue? (y/n) ", "char");
                 while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
             }
 
-            if (attributeNameList.Count > 0) // Making constructors, gets and sets
+            if (inheritance != string.Empty)
+            {
+                input = Input("Add inheritance attributes? (y/n) ", "char");
+                while (input != 'y' && input != 'n') input = Input("Invalid input. Add inheritance attributes? (y/n) ", "char");
+                while (input == 'y') // Adding inheritance attrubutes
+                {
+                    string attributeType = Input("Enter inheritance attribute type: ");
+                    inheritanceAttributeTypeList.Add(attributeType);
+
+                    string attributeName = Input("Enter inheritance attribute name: ");
+                    inheritanceAttributeNameList.Add(attributeName);
+
+                    input = Input("Continue? (y/n) ", "char");
+                    while (input != 'y' && input != 'n')
+                        input = Input("Invalid input. Continue? (y/n) ", "char");
+                }
+            }
+
+            if (attributeNameList.Count > 0 || inheritanceAttributeNameList.Count > 0) // Making constructors, gets and sets
             {
                 input = Input("Add default constructor? (y/n) ", "char");
                 while (input != 'y' && input != 'n') input = Input("Invalid input. Continue? (y/n) ", "char");
@@ -88,7 +110,7 @@ namespace Class_Generator
                 if (input == 'y')
                 {
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + Environment.NewLine + $"        public {className}()" + " { }");
+                        NewLine + NewLine + $"        public {className}()" + " { }");
                 }
 
                 input = Input("Add values constructor? (y/n) ", "char");
@@ -99,20 +121,36 @@ namespace Class_Generator
                     string signatureString = $"        public {className}(";
                     for (int i = 0; i < attributeNameList.Count; i++)
                     {
-                        if (i != attributeNameList.Count - 1)
+                        if (i != attributeNameList.Count - 1 || inheritanceAttributeNameList.Count != 0)
                             signatureString += $"{attributeTypeList[i]} {attributeNameList[i]}, ";
                         else
                             signatureString += $"{attributeTypeList[i]} {attributeNameList[i]})";
                     }
+                    for (int i = 0; i < inheritanceAttributeNameList.Count; i++)
+                    {
+                        if (i != inheritanceAttributeNameList.Count - 1)
+                            signatureString += $"{inheritanceAttributeTypeList[i]} {inheritanceAttributeNameList[i]}, ";
+                        else
+                            signatureString += $"{inheritanceAttributeTypeList[i]} {inheritanceAttributeNameList[i]})";
+                    }
+                    for (int i = 0; i < inheritanceAttributeNameList.Count; i++)
+                    {
+                        if (i == 0)
+                            signatureString += " : base(";
+                        if (i != inheritanceAttributeNameList.Count - 1)
+                            signatureString += $"{inheritanceAttributeNameList[i]}, ";
+                        else
+                            signatureString += $"{inheritanceAttributeNameList[i]})";
+                    }
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
+                        NewLine + NewLine + signatureString + NewLine + "        {");
                     foreach (string attributeName in attributeNameList)
                     {
                         File.AppendAllText($"{className}.cs",
-                            Environment.NewLine + $"            this.{attributeName} = {attributeName};");
+                            NewLine + $"            this.{attributeName} = {attributeName};");
                     }
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + "        }");
+                        NewLine + "        }");
                 }
 
                 input = Input("Add copy constructor? (y/n) ", "char");
@@ -122,30 +160,30 @@ namespace Class_Generator
                 {
                     string signatureString = $"        public {className}({className} toCopy)";
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + Environment.NewLine + signatureString + Environment.NewLine + "        {");
+                        NewLine + NewLine + signatureString + NewLine + "        {");
                     foreach (string attributeName in attributeNameList)
                     {
                         File.AppendAllText($"{className}.cs",
-                            Environment.NewLine + $"            this.{attributeName} = toCopy.{attributeName};");
+                            NewLine + $"            this.{attributeName} = toCopy.{attributeName};");
                     }
                     File.AppendAllText($"{className}.cs",
-                        Environment.NewLine + "        }");
+                        NewLine + "        }");
                 }
 
                 // Gets and sets
                 for (int i = 0; i < attributeNameList.Count; i++)
                 {
                     File.AppendAllText($"{className}.cs",
-                            Environment.NewLine + Environment.NewLine + $"        public {attributeTypeList[i]} {attributeNameList[i].Substring(0, 1).ToUpper() + attributeNameList[i].Substring(1)}"
-                            + Environment.NewLine + "        {"
-                            + Environment.NewLine + "            get { return " + attributeNameList[i] + "; }"
-                            + Environment.NewLine + "            set { " + attributeNameList[i] + " = value; }"
-                            + Environment.NewLine + "        }");
+                            NewLine + NewLine + $"        public {attributeTypeList[i]} {attributeNameList[i].Substring(0, 1).ToUpper() + attributeNameList[i].Substring(1)}"
+                            + NewLine + "        {"
+                            + NewLine + "            get { return " + attributeNameList[i] + "; }"
+                            + NewLine + "            set { " + attributeNameList[i] + " = value; }"
+                            + NewLine + "        }");
                 }
             }
 
             // Finishing the file
-            File.AppendAllText($"{className}.cs", Environment.NewLine + "    }" + Environment.NewLine + "}");
+            File.AppendAllText($"{className}.cs", NewLine + "    }" + NewLine + "}");
 
             // Linking the class if the code runs from a VS project to the project if the user asks for it
             input = Input("Do you want to link the class to the VS project? (y/n) ", "char");
@@ -161,7 +199,7 @@ namespace Class_Generator
                 catch (Exception)
                 {
                     WriteLine("File already exists - copying failed.");
-                    Environment.Exit(0);
+                    Exit(0);
                 }
                 File.WriteAllText($@"{newDirectory}\{userNamespace}.csproj", string.Empty);
                 foreach (string line in txtLines)
