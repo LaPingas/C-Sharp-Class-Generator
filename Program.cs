@@ -166,6 +166,11 @@ namespace Class_Generator
                         File.AppendAllText($"{className}.cs",
                             NewLine + $"            this.{attributeName} = toCopy.{attributeName};");
                     }
+                    foreach (string inheritanceAttributeName in inheritanceAttributeNameList)
+                    {
+                        File.AppendAllText($"{className}.cs",
+                            NewLine + $"            this.{inheritanceAttributeName.Substring(0, 1).ToUpper() + inheritanceAttributeName.Substring(1)} = toCopy.{inheritanceAttributeName.Substring(0, 1).ToUpper() + inheritanceAttributeName.Substring(1)};");
+                    }
                     File.AppendAllText($"{className}.cs",
                         NewLine + "        }");
                 }
